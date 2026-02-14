@@ -4,47 +4,65 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Will You Be My Valentine?</title>
+
 <style>
-body {margin:0; overflow:hidden; font-family: 'Comic Sans MS', cursive; background:black; color:white;}
-.stars {position: fixed; width: 100%; height: 100%; background:black; overflow:hidden; z-index:-3;}
+body {margin:0; overflow:hidden; font-family:'Comic Sans MS', cursive; background:black; color:white;}
+.stars {position:fixed; width:100%; height:100%; background:black; overflow:hidden; z-index:-3;}
 .star {position:absolute; width:2px; height:2px; background:white; animation:twinkle 2s infinite alternate;}
-@keyframes twinkle {from {opacity:0.2;} to{opacity:1;}}
+@keyframes twinkle {from{opacity:0.2;} to{opacity:1;}}
 .emoji {position:absolute; font-size:24px; animation:float linear infinite;}
 @keyframes float {from{transform:translateY(100vh) rotate(0deg);} to{transform:translateY(-10vh) rotate(360deg);}}
 
-/* Screens */
-.screen {position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; flex-direction:column; text-align:center; padding:20px; opacity:1; transition: opacity 1.5s;}
+.screen {position:absolute; width:100%; height:100%; display:flex; justify-content:center; align-items:center; flex-direction:column; text-align:center; padding:20px; opacity:1; transition:opacity 1.5s;}
 .screen.hidden {opacity:0; pointer-events:none;}
-.screen.active {display:flex;}
 
-/* Buttons */
-button {padding:15px 30px; margin:20px; font-size:18px; border:none; border-radius:12px; cursor:pointer; background:pink; position:relative;}
+button {padding:15px 30px; margin:20px; font-size:18px; border:none; border-radius:12px; cursor:pointer; background:pink;}
 
-/* Blur overlay */
 #blurOverlay {position:fixed; width:100%; height:100%; backdrop-filter:blur(20px); background:rgba(0,0,0,0.6); z-index:10; display:flex; justify-content:center; align-items:center; font-size:28px;}
 
-/* Fireworks canvas */
 #canvasFireworks {position:absolute; width:100%; height:100%; z-index:-2;}
-
-/* Typing text */
 #loveLetter {margin-top:20px; font-size:24px; max-width:90%; line-height:1.5;}
 
-/* Mobile adjustments */
-@media(max-width:600px){.emoji{font-size:18px;} button{font-size:16px; padding:12px 24px;} #loveLetter{font-size:20px;}}
+#surpriseBtn {
+    background:hotpink;
+    box-shadow:0 0 15px hotpink;
+    animation:glow 1.5s infinite alternate;
+    opacity:0;
+    transition:opacity 1.5s ease;
+    pointer-events:none;
+}
+
+#surpriseBtn.show {
+    opacity:1;
+    pointer-events:auto;
+}
+
+@keyframes glow {
+    from{box-shadow:0 0 5px hotpink;}
+    to{box-shadow:0 0 25px deeppink;}
+}
+
+@media(max-width:600px){
+.emoji{font-size:18px;}
+button{font-size:16px; padding:12px 24px;}
+#loveLetter{font-size:20px;}
+}
 </style>
 </head>
+
 <body>
+
 <div class="stars" id="stars"></div>
 <div id="blurOverlay">Click anywhere ❤️</div>
 
 <!-- SCREEN 1 -->
-<div class="screen active" id="screen1">
-	<h1>Eirini 🦕✨</h1>
+<div class="screen" id="screen1">
+    <h1>Eirini 🦕✨</h1>
     <h2>If we lived in the dinosaur era,</h2>
     <h2>I’d still find you in every lifetime 💕</h2>
     <h2>You’re my favorite star in the whole universe 🌙⭐</h2>
-    <h2>Will You Be My Valentine? 💖<h2>
-    <button id="yesBtn" onclick="goToSecond()">Yes 💘</button>
+    <h2>Will You Be My Valentine? 💖</h2>
+    <button onclick="goToSecond()">Yes 💘</button>
     <button id="noBtn">No 😅</button>
 </div>
 
@@ -53,6 +71,7 @@ button {padding:15px 30px; margin:20px; font-size:18px; border:none; border-radi
     <canvas id="canvasFireworks"></canvas>
     <h1>YAYYYYY 🥰🎆</h1>
     <div id="loveLetter"></div>
+    <button id="surpriseBtn" onclick="openSurprise()">Click here for a surprise ✨</button>
 </div>
 
 <!-- AUDIO -->
@@ -60,79 +79,175 @@ button {padding:15px 30px; margin:20px; font-size:18px; border:none; border-radi
 <audio id="song2" src="song2.mp3" loop></audio>
 
 <script>
-/* Generate Stars */
-for(let i=0;i<200;i++){let s=document.createElement("div");s.className="star";s.style.left=Math.random()*100+"vw";s.style.top=Math.random()*100+"vh";s.style.animationDuration=(Math.random()*2+1)+"s";document.getElementById("stars").appendChild(s);}
 
-/* Flying Emojis */
-function createEmoji(){const e=document.createElement("div"); e.className="emoji"; e.innerText=Math.random()>0.5?"🦕":"💖"; e.style.left=Math.random()*100+"vw"; e.style.animationDuration=(Math.random()*5+5)+"s"; document.body.appendChild(e); setTimeout(()=>e.remove(),10000);}
+/* Stars */
+for(let i=0;i<200;i++){
+let s=document.createElement("div");
+s.className="star";
+s.style.left=Math.random()*100+"vw";
+s.style.top=Math.random()*100+"vh";
+s.style.animationDuration=(Math.random()*2+1)+"s";
+document.getElementById("stars").appendChild(s);
+}
+
+/* Emojis */
+function createEmoji(){
+const e=document.createElement("div");
+e.className="emoji";
+e.innerText=Math.random()>0.5?"🦕":"💖";
+e.style.left=Math.random()*100+"vw";
+e.style.animationDuration=(Math.random()*5+5)+"s";
+document.body.appendChild(e);
+setTimeout(()=>e.remove(),10000);
+}
 setInterval(createEmoji,500);
 
-/* Chrome autoplay fix */
+/* Chrome autoplay */
 const overlay=document.getElementById("blurOverlay");
 const song1=document.getElementById("song1");
 const song2=document.getElementById("song2");
-overlay.addEventListener("click",()=>{overlay.style.display="none"; song1.play();});
 
-/* No button dodge */
+overlay.addEventListener("click",()=>{
+overlay.style.display="none";
+song1.play();
+});
+
+/* No button runs away */
 const noBtn=document.getElementById("noBtn");
-noBtn.addEventListener("mouseover",()=>{const x=Math.random()*(window.innerWidth-noBtn.offsetWidth); const y=Math.random()*(window.innerHeight-noBtn.offsetHeight); noBtn.style.transform=`translate(${x}px,${y}px)`;});
+noBtn.addEventListener("mouseover",()=>{
+const x=Math.random()*(window.innerWidth-noBtn.offsetWidth);
+const y=Math.random()*(window.innerHeight-noBtn.offsetHeight);
+noBtn.style.transform=`translate(${x}px,${y}px)`;
+});
 
-/* Switch screen with fade */
+/* Fade transition */
 function goToSecond(){
-    const screen1=document.getElementById("screen1");
-    const screen2=document.getElementById("screen2");
+const s1=document.getElementById("screen1");
+const s2=document.getElementById("screen2");
 
-    screen1.classList.add("hidden");
-    setTimeout(()=>{
-        screen1.classList.remove("active");
-        screen2.classList.remove("hidden");
-        screen2.classList.add("active");
-        song1.pause(); song2.play();
-        startFireworks(); startTypingLetter();
-    }, 1500); // match the CSS transition duration
+s1.classList.add("hidden");
+
+setTimeout(()=>{
+s2.classList.remove("hidden");
+song1.pause();
+song2.play();
+startFireworks();
+startTypingLetter();
+},1500);
 }
 
-/* Typing love letter effect */
-const loveLetterText="RAWR means I love you 🦖💖,\n\nYou make my heart 🫀 dance like fireworks 🎆 in the night sky. I hope you feel the same magic too! 💖 You shine brighter than every star 🌟 I’d cross galaxies for you 🚀✨";
-function startTypingLetter(){const container=document.getElementById("loveLetter"); let i=0; function type(){if(i<loveLetterText.length){const c=loveLetterText[i]; container.innerHTML+=c==="\n"? "<br>":c; i++; setTimeout(type,50);} } type();}
+/* Typing letter */
+const loveLetterText="RAWR means I love you 🦖💖,\n\nYou make my heart dance like fireworks 🎆 in the night sky.\nYou shine brighter than every star 🌟\nI’d cross galaxies for you 🚀✨";
 
-/* Fireworks (from CodePen) */
-let canvas, ctx, w, h, particles=[], probability=0.04;
+function startTypingLetter(){
+const container=document.getElementById("loveLetter");
+let i=0;
+
+function type(){
+if(i<loveLetterText.length){
+const c=loveLetterText[i];
+container.innerHTML+=c==="\n"?"<br>":c;
+i++;
+setTimeout(type,40);
+}else{
+showSurpriseButton();
+}
+}
+type();
+}
+
+/* Show button after typing */
+function showSurpriseButton(){
+const btn=document.getElementById("surpriseBtn");
+btn.classList.add("show");
+
+/* optional small firework burst */
+for(let i=0;i<4;i++){createFirework();}
+}
+
+/* Surprise link */
+function openSurprise(){
+for(let i=0;i<6;i++){createFirework();}
+setTimeout(()=>{
+window.open("https://youtu.be/mGUjVbsYG6E?si=vHZHMD8EiRZCQetJ&t=145","_blank");
+},1200);
+}
+
+/* Fireworks */
+let canvas,ctx,w,h,particles=[],probability=0.04;
 let xPoint,yPoint;
+
 function startFireworks(){
-    canvas=document.getElementById("canvasFireworks");
-    ctx=canvas.getContext("2d");
-    resizeCanvas();
-    window.requestAnimationFrame(updateWorld);
-    window.addEventListener("resize",resizeCanvas,false);
+canvas=document.getElementById("canvasFireworks");
+ctx=canvas.getContext("2d");
+resizeCanvas();
+window.requestAnimationFrame(updateWorld);
+window.addEventListener("resize",resizeCanvas,false);
 }
-function resizeCanvas(){w=canvas.width=window.innerWidth; h=canvas.height=window.innerHeight;}
-function updateWorld(){update(); paint(); window.requestAnimationFrame(updateWorld);}
+
+function resizeCanvas(){
+w=canvas.width=window.innerWidth;
+h=canvas.height=window.innerHeight;
+}
+
+function updateWorld(){
+update();
+paint();
+window.requestAnimationFrame(updateWorld);
+}
+
 function update(){
-    if(particles.length<500 && Math.random()<probability) createFirework();
-    let alive=[];
-    for(let i=0;i<particles.length;i++){if(particles[i].move()) alive.push(particles[i]);}
-    particles=alive;
+if(particles.length<500 && Math.random()<probability) createFirework();
+let alive=[];
+for(let i=0;i<particles.length;i++){
+if(particles[i].move()) alive.push(particles[i]);
 }
+particles=alive;
+}
+
 function paint(){
-    ctx.globalCompositeOperation='source-over';
-    ctx.fillStyle="rgba(0,0,0,0.2)";
-    ctx.fillRect(0,0,w,h);
-    ctx.globalCompositeOperation='lighter';
-    for(let i=0;i<particles.length;i++) particles[i].draw(ctx);
+ctx.globalCompositeOperation='source-over';
+ctx.fillStyle="rgba(0,0,0,0.2)";
+ctx.fillRect(0,0,w,h);
+ctx.globalCompositeOperation='lighter';
+for(let i=0;i<particles.length;i++) particles[i].draw(ctx);
 }
+
 function createFirework(){
-    xPoint=Math.random()*(w-200)+100;
-    yPoint=Math.random()*(h-200)+100;
-    const nFire=Math.random()*50+100;
-    const c="rgb("+(~~(Math.random()*200+55))+","+(~~(Math.random()*200+55))+","+(~~(Math.random()*200+55))+")";
-    for(let i=0;i<nFire;i++) particles.push(new Particle(xPoint,yPoint,c));
+xPoint=Math.random()*(w-200)+100;
+yPoint=Math.random()*(h-200)+100;
+const nFire=Math.random()*50+100;
+const c="rgb("+(~~(Math.random()*200+55))+","+(~~(Math.random()*200+55))+","+(~~(Math.random()*200+55))+")";
+for(let i=0;i<nFire;i++) particles.push(new Particle(xPoint,yPoint,c));
 }
+
 class Particle{
-    constructor(x,y,color){this.x=x; this.y=y; this.color=color; this.radius=Math.random()*2+1; this.angle=Math.random()*2*Math.PI; this.speed=Math.random()*5+2; this.gravity=0.05; this.alpha=1; this.decay=Math.random()*0.015+0.003;}
-    move(){this.x+=Math.cos(this.angle)*this.speed; this.y+=Math.sin(this.angle)*this.speed+this.gravity*10; this.alpha-=this.decay; return this.alpha>0;}
-    draw(ctx){ctx.save(); ctx.globalAlpha=this.alpha; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2,false); ctx.fill(); ctx.restore();}
+constructor(x,y,color){
+this.x=x; this.y=y; this.color=color;
+this.radius=Math.random()*2+1;
+this.angle=Math.random()*2*Math.PI;
+this.speed=Math.random()*5+2;
+this.gravity=0.05;
+this.alpha=1;
+this.decay=Math.random()*0.015+0.003;
 }
+move(){
+this.x+=Math.cos(this.angle)*this.speed;
+this.y+=Math.sin(this.angle)*this.speed+this.gravity*10;
+this.alpha-=this.decay;
+return this.alpha>0;
+}
+draw(ctx){
+ctx.save();
+ctx.globalAlpha=this.alpha;
+ctx.fillStyle=this.color;
+ctx.beginPath();
+ctx.arc(this.x,this.y,this.radius,0,Math.PI*2,false);
+ctx.fill();
+ctx.restore();
+}
+}
+
 </script>
 </body>
 </html>
